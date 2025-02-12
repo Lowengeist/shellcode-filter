@@ -1,0 +1,6 @@
+# Compilation related 
+*.o
+shellcode-filter
+
+# gdb
+.gdb_history
