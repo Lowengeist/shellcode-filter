@@ -3,7 +3,7 @@ extern strcmp
 
 global _start
 
-section .rodata:
+section .rodata
 exclude_flag:
     db      "-x", 0
 include_flag:
@@ -16,7 +16,6 @@ bad_args:
     db      "Usage: ./shellcode-filter [-xi] bytes", 0x0a, 0
 
 section .text
-
 _start:
     ; Parsing CLI arguments
     mov     rax, QWORD [rsp]
