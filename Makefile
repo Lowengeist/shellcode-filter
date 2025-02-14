@@ -2,7 +2,7 @@ PROG=shellcode-filter
 INTERPRETER=/lib64/ld-linux-x86-64.so.2
 
 build: $(PROG)
-	strip $<
+	strip -R .hash -R .gnu.version -R .eh_frame $<
 
 $(PROG): $(PROG).o
 	ld -I$(INTERPRETER) -lc -o $@ $< 
@@ -10,7 +10,7 @@ $(PROG): $(PROG).o
 	chmod +x $@
 
 $(PROG).o: $(PROG).asm
-	nasm -f elf64 $<
+	nasm -f elf64 -o $@ $<
 
 run: build
 	./$(PROG)
