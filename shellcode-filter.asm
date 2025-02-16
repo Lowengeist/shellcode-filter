@@ -8,6 +8,18 @@ exclude_flag:
     db      "-x", 0
 include_flag:
     db      "-i", 0
+status_template_str:
+    db      0x09, "[", 0x1b, "[1;%dm%s", 0x1b, "[0;39m] %s", 0x0a, 0
+unavailable_str:
+    db      "X Unavailable", 0     
+available_str: 
+    db      "✓ Available", 0
+prefixes_section_str:
+    db      "-------- PREFIXES --------", 0x0a, 0
+sizes_str:
+    db      "Operand size override:", 0x0a, 0
+operand_size_override_16_32_str:
+    db      "Change operand size from 32 bit to 16 bit, or the contrary (D bit)", 0x0a, 0
 bad_args:
     db      "Usage: ./shellcode-filter [-ix] bytes", 0x0a, 0
 invalid_byte:
@@ -18,6 +30,22 @@ available:
     resb    32
 
 section .text
+print_status:
+    xor     rax, rax
+    mov     rcx, rdi 
+    lea     rdi, [status_template_str]
+    add     rsi, 31
+    cmp     rsi, 32
+    je      print_available
+    lea     rdx, [unavailable_str]
+    call    printf
+    ret
+print_available:
+    lea     rdx, [available_str]
+    call    printf
+    ret
+
+
 _start:
     ; Parsing CLI arguments
     mov     rax, QWORD [rsp]
@@ -107,6 +135,27 @@ process_byte:
     mov     dil, BYTE [r11]
     test    rdi, rdi
     jnz     loop1
+
+    ; Prefixes
+    lea     rdi, [prefixes_section_str]
+    xor     rax, rax
+    call    printf
+
+    lea     rdi, [sizes_str]
+    xor     rax, rax
+    call    printf
+
+    ; 0x66
+    lea     rdi, [operand_size_override_16_32_str]
+    
+    xor     rsi, rsi
+    mov     rbx, [available + 12]
+    bt      rbx, 0x1
+    setc    sil
+
+    call    print_status
+
+    ; Others coming later...
 
     xor     rdi, rdi
     call    exit
